@@ -7,6 +7,11 @@
     <property name="connection.url">jdbc:mysql://localhost:3306/tpd</property>
     <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
       <mapping class="entities.PermissionTypeEntity"/>
+      <mapping class="entities.DownloadHistoryEntity"/>
+      <mapping class="entities.FileEntity"/>
+      <mapping class="entities.FilePermissionEntity"/>
+      <mapping class="entities.FileVersionEntity"/>
+      <mapping class="entities.UserEntity"/>
       <!-- <property name="connection.username"/> -->
     <!-- <property name="connection.password"/> -->
 
