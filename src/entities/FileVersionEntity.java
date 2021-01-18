@@ -2,23 +2,27 @@ package entities;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
 @Table(name = "file_version", schema = "tpd", catalog = "")
 public class FileVersionEntity {
-    private long id;
+    private Long id;
     private Timestamp modifiedOn;
     private String contents;
     private Integer versionNumber;
+    private Collection<DownloadHistoryEntity> downloadHistoriesById;
+    private FileEntity fileByFileId;
+    private UserEntity userByModifiedBy;
 
     @Id
     @Column(name = "id", nullable = false)
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -57,7 +61,7 @@ public class FileVersionEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FileVersionEntity that = (FileVersionEntity) o;
-        return id == that.id &&
+        return Objects.equals(id, that.id) &&
                 Objects.equals(modifiedOn, that.modifiedOn) &&
                 Objects.equals(contents, that.contents) &&
                 Objects.equals(versionNumber, that.versionNumber);
@@ -66,5 +70,34 @@ public class FileVersionEntity {
     @Override
     public int hashCode() {
         return Objects.hash(id, modifiedOn, contents, versionNumber);
+    }
+
+    @OneToMany(mappedBy = "fileVersionByFileVersionId")
+    public Collection<DownloadHistoryEntity> getDownloadHistoriesById() {
+        return downloadHistoriesById;
+    }
+
+    public void setDownloadHistoriesById(Collection<DownloadHistoryEntity> downloadHistoriesById) {
+        this.downloadHistoriesById = downloadHistoriesById;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "file_id", referencedColumnName = "id", nullable = false)
+    public FileEntity getFileByFileId() {
+        return fileByFileId;
+    }
+
+    public void setFileByFileId(FileEntity fileByFileId) {
+        this.fileByFileId = fileByFileId;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "modified_by", referencedColumnName = "id", nullable = false)
+    public UserEntity getUserByModifiedBy() {
+        return userByModifiedBy;
+    }
+
+    public void setUserByModifiedBy(UserEntity userByModifiedBy) {
+        this.userByModifiedBy = userByModifiedBy;
     }
 }

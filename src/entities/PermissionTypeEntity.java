@@ -1,21 +1,23 @@
 package entities;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
 @Table(name = "permission_type", schema = "tpd", catalog = "")
 public class PermissionTypeEntity {
-    private long id;
+    private Long id;
     private String name;
+    private Collection<FilePermissionEntity> filePermissionsById;
 
     @Id
     @Column(name = "id", nullable = false)
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -34,12 +36,21 @@ public class PermissionTypeEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PermissionTypeEntity that = (PermissionTypeEntity) o;
-        return id == that.id &&
+        return Objects.equals(id, that.id) &&
                 Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
+    }
+
+    @OneToMany(mappedBy = "permissionTypeByPermissionTypeId")
+    public Collection<FilePermissionEntity> getFilePermissionsById() {
+        return filePermissionsById;
+    }
+
+    public void setFilePermissionsById(Collection<FilePermissionEntity> filePermissionsById) {
+        this.filePermissionsById = filePermissionsById;
     }
 }
