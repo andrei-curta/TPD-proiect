@@ -1,22 +1,27 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE hibernate-configuration PUBLIC
-    "-//Hibernate/Hibernate Configuration DTD//EN"
-    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
-  <session-factory>
-    <property name="connection.url">jdbc:mysql://localhost:3306/tpd</property>
-    <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-    <mapping class="entities.DownloadHistoryEntity"/>
-    <mapping class="entities.FileEntity"/>
-    <mapping class="entities.FilePermissionEntity"/>
-    <mapping class="entities.FileVersionEntity"/>
-    <mapping class="entities.PermissionTypeEntity"/>
-    <mapping class="entities.UserEntity"/>
+    <session-factory>
+        <property name="connection.url">jdbc:mysql://localhost:3306/tpd</property>
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
 
-    <!-- <property name="connection.username"/> -->
-    <!-- <property name="connection.password"/> -->
+        <property name="connection.username">root</property>
+        <property name="connection.password">123456789</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
 
-    <!-- DB schema will be updated if needed -->
-    <!-- <property name="hibernate.hbm2ddl.auto">update</property> -->
-  </session-factory>
+        <mapping class="entities.DownloadHistoryEntity"/>
+        <mapping class="entities.FileEntity"/>
+        <mapping class="entities.FilePermissionEntity"/>
+        <mapping class="entities.FileVersionEntity"/>
+        <mapping class="entities.PermissionTypeEntity"/>
+        <mapping class="entities.UserEntity"/>
+
+
+        <!-- DB schema will be updated if needed -->
+        <!-- <property name="hibernate.hbm2ddl.auto">update</property> -->
+
+
+    </session-factory>
 </hibernate-configuration>
