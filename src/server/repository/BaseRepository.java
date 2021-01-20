@@ -20,12 +20,11 @@ public class BaseRepository<T> {
         return session.get(entityClass, id);
     }
 
-//    public List getAll() {
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        Table table = entityClass.getAnnotation(Table.class);
-//        String tableName = table.name();
-//        return session.createQuery("from " + tableName).list();
-//    }
+    public List getAll() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        return session.createQuery("from " + entityClass.getName()).list();
+    }
 
     public T create(T entity) {
         Session session = HibernateUtil.getSessionFactory().openSession();

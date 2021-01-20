@@ -22,11 +22,9 @@ public class Handlers {
             System.out.println("intra");
             UserRepository repo = new UserRepository();
             try {
-//                List<UserEntity>l = repo.getAll();
-//                System.out.println(l.get(0).getUsername());
-                UserEntity userEntity = new UserEntity();
-                userEntity.setUsername("132");
-                repo.create(userEntity);
+                List<UserEntity>l = repo.getAll();
+                System.out.println(l.get(0).getUsername());
+
             }catch (Exception e){
                 e.printStackTrace();
             }
