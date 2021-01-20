@@ -77,6 +77,7 @@ public class TpdHttpsServer {
 
             System.out.println("server started at " + port);
             server.createContext("/", new Handlers.RootHandler());
+            server.createContext("/users/getAll", new Handlers.GetAllUsersHandler());
 //            server.createContext("/echoHeader", new Handlers.EchoHeaderHandler());
 //            server.createContext("/echoGet", new Handlers.EchoGetHandler());
 //            server.createContext("/echoPost", new Handlers.EchoPostHandler());
