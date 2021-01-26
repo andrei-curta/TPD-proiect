@@ -2,6 +2,8 @@ package server;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.InetSocketAddress;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -20,6 +22,7 @@ import javax.net.ssl.TrustManagerFactory;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
+import server.handlers.LoginHandler;
 
 public class TpdHttpsServer {
     private int port;
@@ -27,6 +30,9 @@ public class TpdHttpsServer {
     private static String protocol = "TLS";
 
     public void start(int port) {
+        CookieManager cm = new CookieManager();
+        CookieHandler.setDefault(cm);
+
         try {
             this.port = port;
             // load certificate
@@ -75,9 +81,11 @@ public class TpdHttpsServer {
                 }
             });
 
+
             System.out.println("server started at " + port);
             server.createContext("/", new Handlers.RootHandler());
-            server.createContext("/users/getAll", new Handlers.GetAllUsersHandler());
+            server.createContext("/users/getAll", new Handlers.GetAllUsersHandler()); //.setAuthenticator(new CustomAuthenticator())
+            server.createContext("/login", new LoginHandler());
 //            server.createContext("/echoHeader", new Handlers.EchoHeaderHandler());
 //            server.createContext("/echoGet", new Handlers.EchoGetHandler());
 //            server.createContext("/echoPost", new Handlers.EchoPostHandler());
