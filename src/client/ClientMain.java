@@ -1,17 +1,20 @@
 package client;
 
+import client.models.UserUI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import entities.UserEntity;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -39,30 +42,39 @@ public class ClientMain extends Application {
         String resp = null;
 
         try {
-             resp = HttpRequestHelper.get("https://localhost:9000/users/getAll");
+             resp = HttpRequestHelper.get("https://localhost:9000/files/get?userid=1");
 
         }catch (Exception e){
             e.printStackTrace();
         }
 
 
-        List<UserEntity> users = null;
+        List<UserUI> users = null;
         try {
 
 
 // Manually converting the response body InputStream to APOD using Jackson
             ObjectMapper mapper = new ObjectMapper();
             CollectionType javaType = mapper.getTypeFactory()
-                    .constructCollectionType(List.class, UserEntity.class);
+                    .constructCollectionType(List.class, UserUI.class);
             users = mapper.readValue(resp, javaType);
         }catch (Exception e){
             e.printStackTrace();
         }
 
 
-        ObservableList<String> names = FXCollections.observableArrayList(users.stream().map(UserEntity::getUsername).collect(Collectors.toList()));
-        ListView<String> listView = new ListView<String>(names);
-        listView.setMaxSize(200, 160);
+        ObservableList<UserUI> names = FXCollections.observableArrayList(users);
+        ListView<UserUI> listView = new ListView<UserUI>(names);
+        listView.setMaxSize(250, 500);
+        listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println("clicked on " + listView.getSelectionModel().getSelectedItem().getId());
+            }
+        });
+
+
         //Creating the layout
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(5, 5, 5, 50));
@@ -70,8 +82,12 @@ public class ClientMain extends Application {
         layout.setStyle("-fx-background-color: BEIGE");
         //Setting the stage
         Scene scene = new Scene(layout, 595, 200);
+
+
         primaryStage.setTitle("List View Example");
-        primaryStage.setScene(scene);
+//        primaryStage.setScene(scene);
+        Parent root = FXMLLoader.load(getClass().getResource("./ui/UserFilesView.fxml"));
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 

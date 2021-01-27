@@ -1,5 +1,6 @@
 package server;
 
+import DTO.FileDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -23,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Handlers {
 
@@ -86,14 +88,18 @@ public class Handlers {
             //todo: dehardcodat
             UserEntity requestUser = userRepository.get(1);
 
-            List<FileEntity> files = userRepository.getAllFilesCanAccessFrom(requestUser, fileOwner);
-            ObjectMapper objectMapper = new ObjectMapper();
-            String response = objectMapper.writeValueAsString(files);
-            httpExchange.sendResponseHeaders(200, response.length());
-            OutputStream os = httpExchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-
+            try {
+                List<FileDto> files = userRepository.getAllFilesCanAccessFrom(requestUser, fileOwner).stream().map(f -> new FileDto(f)).collect(Collectors.toList());
+                ObjectMapper objectMapper = new ObjectMapper();
+                String response = objectMapper.writeValueAsString(files);
+                httpExchange.sendResponseHeaders(200, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 

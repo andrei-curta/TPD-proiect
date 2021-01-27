@@ -85,6 +85,7 @@ public class TpdHttpsServer {
             System.out.println("server started at " + port);
             server.createContext("/", new Handlers.RootHandler());
             server.createContext("/users/getAll", new Handlers.GetAllUsersHandler()); //.setAuthenticator(new CustomAuthenticator())
+            server.createContext("/files/get", new Handlers.GetFiles());
             server.createContext("/login", new LoginHandler());
 //            server.createContext("/echoHeader", new Handlers.EchoHeaderHandler());
 //            server.createContext("/echoGet", new Handlers.EchoGetHandler());

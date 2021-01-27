@@ -15,7 +15,7 @@ public class UserRepository extends BaseRepository<UserEntity> {
         super(UserEntity.class);
     }
 
-    public List getAllFilesCanAccessFrom(UserEntity requestUser, UserEntity owner) {
+    public List<FileEntity> getAllFilesCanAccessFrom(UserEntity requestUser, UserEntity owner) {
         Collection<FileEntity> files = owner.getFilesById();
 
         return files.stream().filter(f -> f.getFilePermissionsById().stream().anyMatch(p -> p.getUserByUserId().equals(requestUser))).collect(Collectors.toList());
