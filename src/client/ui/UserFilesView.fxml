@@ -7,7 +7,7 @@
    <children>
       <TableView id="tblFiles" fx:id="tblFiles" layoutX="14.0" layoutY="14.0" onMouseClicked="#onFileClicked" prefHeight="374.0" prefWidth="575.0">
         <columns>
-          <TableColumn prefWidth="75.0" text="Nume " />
+          <TableColumn fx:id="title" prefWidth="75.0" text="Nume " />
           <TableColumn prefWidth="75.0" text="C2" />
         </columns>
       </TableView>

@@ -16,6 +16,9 @@ public class FileDto {
 //    private Collection<FilePer> filePermissionsById;
 //    private Collection<FileVersionDto> fileVersions;
 
+    public FileDto(){
+
+    }
 
     public FileDto(FileEntity fileEntity) {
         id = fileEntity.getId();

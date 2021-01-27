@@ -1,6 +1,7 @@
 package server;
 
 import DTO.FileDto;
+import DTO.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -48,20 +49,18 @@ public class Handlers {
 
             UserRepository repo = new UserRepository();
             try {
-                List<UserEntity> l = repo.getAll();
 
+                List<UserDto> list = repo.getAll().stream().map(f -> new UserDto(f)).collect(Collectors.toList());
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                String response = objectMapper.writeValueAsString(list);
+                he.sendResponseHeaders(200, response.length());
+                OutputStream os = he.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            List<UserEntity> list = repo.getAll();
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String response = objectMapper.writeValueAsString(list);
-            he.sendResponseHeaders(200, response.length());
-            OutputStream os = he.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
         }
     }
 
@@ -96,8 +95,7 @@ public class Handlers {
                 OutputStream os = httpExchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -137,7 +135,6 @@ public class Handlers {
             FileVersionEntity file = objectMapper.readValue(httpExchange.getRequestBody(), FileVersionEntity.class);
 
 
-
             //Todo: check if the file belongs to the curent user
 
             FileVersionRepository fileVersionRepository = new FileVersionRepository();
@@ -145,7 +142,7 @@ public class Handlers {
 
 //            int latestVersion = file.getFileByFileId()
 
-                    FileVersionEntity file_db = fileVersionRepository.create(file);
+            FileVersionEntity file_db = fileVersionRepository.create(file);
 
             //return created entity
             String response = objectMapper.writeValueAsString(file_db);

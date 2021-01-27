@@ -20,7 +20,7 @@ public class BaseRepository<T> {
         return session.get(entityClass, id);
     }
 
-    public List getAll() {
+    public List<T> getAll() {
         Session session = HibernateUtil.getSessionFactory().openSession();
 
         return session.createQuery("from " + entityClass.getName()).list();
