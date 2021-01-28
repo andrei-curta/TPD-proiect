@@ -34,5 +34,7 @@ public class FileController {
                 e.printStackTrace();
             }
         }
+
+        txtContents.setEditable(false);
     }
 }

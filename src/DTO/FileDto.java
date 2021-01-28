@@ -17,6 +17,8 @@ public class FileDto {
     private String createdBy;
     private FileVersionDto latestVersion;
 
+
+    private List<String> permissions;
 //    private Collection<FilePer> filePermissionsById;
 //    private Collection<FileVersionDto> fileVersions;
 
@@ -34,7 +36,8 @@ public class FileDto {
         if(versions.size() > 0) {
             latestVersion = versions.get(versions.size() - 1);
         }
-
+        permissions = fileEntity.getFilePermissionsById().stream().map(f -> f.getPermissionTypeByPermissionTypeId().getName()).collect(Collectors.toList());
+        System.out.println("Permissions: " + permissions.size());
     }
 
     public Long getId() {
@@ -76,4 +79,13 @@ public class FileDto {
     public void setLatestVersion(FileVersionDto latestVersion) {
         this.latestVersion = latestVersion;
     }
+
+    public List<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
+    }
+
 }
