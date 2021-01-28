@@ -1,22 +1,26 @@
 package DTO;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import entities.FileEntity;
 import entities.FilePermissionEntity;
 import entities.FileVersionEntity;
 import entities.UserEntity;
 
 import java.sql.Timestamp;
-import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class FileDto {
     private Long id;
     private String title;
     private Timestamp dateCreated;
     private String createdBy;
+    private FileVersionDto latestVersion;
+
 //    private Collection<FilePer> filePermissionsById;
 //    private Collection<FileVersionDto> fileVersions;
 
-    public FileDto(){
+    public FileDto() {
 
     }
 
@@ -25,6 +29,12 @@ public class FileDto {
         title = fileEntity.getTitle();
         dateCreated = fileEntity.getDateCreated();
         createdBy = fileEntity.getUserByOwnerId().getUsername();
+
+        List<FileVersionDto> versions= fileEntity.getFileVersionsById().stream().map(f -> new FileVersionDto(f)).sorted(Comparator.comparing(FileVersionDto::getVersionNumber)).collect(Collectors.toList());
+        if(versions.size() > 0) {
+            latestVersion = versions.get(versions.size() - 1);
+        }
+
     }
 
     public Long getId() {
@@ -57,5 +67,13 @@ public class FileDto {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public FileVersionDto getLatestVersion() {
+        return latestVersion;
+    }
+
+    public void setLatestVersion(FileVersionDto latestVersion) {
+        this.latestVersion = latestVersion;
     }
 }
