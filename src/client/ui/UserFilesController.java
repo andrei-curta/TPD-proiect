@@ -18,7 +18,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class UserFilesController implements Initializable {
+public class UserFilesController {
 
     private UserDto currentPageUser;
 
@@ -27,8 +27,10 @@ public class UserFilesController implements Initializable {
     @FXML
     private TableColumn<FileDto, String> title;
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+
+    public void initData(UserDto user){
+        System.out.println("in init data : " + user);
+        currentPageUser = user;
         List<FileDto> files = null;
         try {
             String resp = HttpRequestHelper.get("https://localhost:9000/files/get?userid=1");
@@ -43,10 +45,6 @@ public class UserFilesController implements Initializable {
         ObservableList<FileDto> fileDtoObservableList = FXCollections.observableArrayList(files);
         title.setCellValueFactory(new PropertyValueFactory<FileDto, String>("title"));
         tblFiles.getItems().setAll(fileDtoObservableList);
-    }
-
-    public void initData(UserDto user){
-        currentPageUser = user;
     }
 
     @FXML

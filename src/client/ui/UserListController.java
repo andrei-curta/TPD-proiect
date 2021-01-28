@@ -7,12 +7,19 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import util.HttpRequestHelper;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -41,5 +48,28 @@ public class UserListController implements Initializable {
     public void userClicked(MouseEvent event) {
         System.out.println("clicked on " + lstUsers.getSelectionModel().getSelectedItem());
 
+        if (lstUsers.getSelectionModel().getSelectedItem() == null){
+            System.out.println("Null selection");
+        }
+        else {
+
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("UserFilesView.fxml"));
+                Parent root1 = (Parent) fxmlLoader.load();
+                Stage stage = new Stage();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.initStyle(StageStyle.UNDECORATED);
+                stage.setTitle("User files");
+                stage.setScene(new Scene(root1));
+                //pass data to the controller
+                UserFilesController controller = fxmlLoader.getController();
+                UserDto clickedUser = (UserDto) lstUsers.getSelectionModel().getSelectedItem();
+                controller.initData(clickedUser);
+
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
