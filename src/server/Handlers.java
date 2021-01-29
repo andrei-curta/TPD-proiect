@@ -1,6 +1,7 @@
 package server;
 
 import DTO.FileDto;
+import DTO.LoginDto;
 import DTO.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
@@ -15,12 +16,17 @@ import util.HibernateUtil;
 import javax.xml.ws.handler.Handler;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.HttpCookie;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Handlers {
+    private static Map<String, Long> sessionsUsers = new HashMap<>();
+    private static int sessionCounter = 0;
 
     public static class RootHandler implements HttpHandler {
 
@@ -173,5 +179,47 @@ public class Handlers {
             }
         }
         return result;
+    }
+
+    public static class LoginHandler implements HttpHandler {
+
+        UserRepository userRepository = new UserRepository();
+
+        @Override
+        public void handle(HttpExchange httpExchange) throws IOException {
+            //get object sent by client
+            ObjectMapper objectMapper = new ObjectMapper();
+            LoginDto loginData = objectMapper.readValue(httpExchange.getRequestBody(), LoginDto.class);
+
+            HttpCookie cookie;
+            UserEntity user = userRepository.getUserByUsername(loginData.getUsername());
+
+            if (user != null) {
+                sessionCounter++;
+                String sessionId = Integer.toString((user.getId() +
+                        Integer.toString(sessionCounter) + new Timestamp(System.currentTimeMillis()).toString()).hashCode());
+                cookie = new HttpCookie("sessionId", sessionId);
+
+                CookieManager cm = (CookieManager) CookieManager.getDefault();
+                cm.getCookieStore().add(null, cookie);
+
+                httpExchange.getResponseHeaders().add("Set-Cookie", cookie.toString());
+                sessionsUsers.put(sessionId, user.getId());
+                System.out.println(sessionsUsers.toString());
+
+                String response = "Login successful " + sessionId;
+                httpExchange.sendResponseHeaders(200, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+
+            } else {
+                String response = "Login failed";
+                httpExchange.sendResponseHeaders(401, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            }
+        }
     }
 }

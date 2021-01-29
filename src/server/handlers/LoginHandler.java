@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.CookieHandler;
 import java.net.HttpCookie;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +33,12 @@ public class LoginHandler implements HttpHandler {
 
         if (user != null) {
             sessionCounter++;
-            String sessionId = Integer.toString((user.getUsername() +
-                    Integer.toString(sessionCounter)).hashCode()) ;
+            String sessionId = Integer.toString((user.getId() +
+                    Integer.toString(sessionCounter) + new Timestamp(System.currentTimeMillis()).toString()).hashCode());
             cookie = new HttpCookie("sessionId", sessionId);
+
+
+
             httpExchange.getResponseHeaders().add("Set-Cookie", cookie.toString());
             sessionsUsers.put(sessionId, user.getId());
             System.out.println(sessionsUsers.toString());

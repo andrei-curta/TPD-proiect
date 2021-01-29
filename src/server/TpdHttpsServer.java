@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -29,11 +31,15 @@ public class TpdHttpsServer {
     private HttpsServer server;
     private static String protocol = "TLS";
 
-    public void start(int port) {
-        CookieManager cm = new CookieManager();
-        CookieHandler.setDefault(cm);
+    public static Map<String, Long> sessionsUsers = new HashMap<>();
+    public static int sessionCounter = 0;
 
+    public void start(int port) {
         try {
+
+            CookieManager cm = new CookieManager();
+            CookieManager.setDefault(cm);
+
             this.port = port;
             // load certificate
             String keystoreFilename = getPath() + "keys.jks";
@@ -84,10 +90,10 @@ public class TpdHttpsServer {
 
             System.out.println("server started at " + port);
             server.createContext("/", new Handlers.RootHandler());
-            server.createContext("/users/getAll", new Handlers.GetAllUsersHandler()); //.setAuthenticator(new CustomAuthenticator())
+            server.createContext("/users/getAll", new Handlers.GetAllUsersHandler()).setAuthenticator(new CustomAuthenticator());
             server.createContext("/files/get", new Handlers.GetFiles());
             server.createContext("/files/add", new Handlers.AddFile());
-            server.createContext("/login", new LoginHandler());
+            server.createContext("/login", new Handlers.LoginHandler());
 //            server.createContext("/echoHeader", new Handlers.EchoHeaderHandler());
 //            server.createContext("/echoGet", new Handlers.EchoGetHandler());
 //            server.createContext("/echoPost", new Handlers.EchoPostHandler());
