@@ -91,8 +91,8 @@ public class TpdHttpsServer {
             System.out.println("server started at " + port);
             server.createContext("/", new Handlers.RootHandler());
             server.createContext("/users/getAll", new Handlers.GetAllUsersHandler()).setAuthenticator(new CustomAuthenticator());
-            server.createContext("/files/get", new Handlers.GetFiles());
-            server.createContext("/files/add", new Handlers.AddFile());
+            server.createContext("/files/get", new Handlers.GetFiles()).setAuthenticator(new CustomAuthenticator());
+            server.createContext("/files/add", new Handlers.AddFile()).setAuthenticator(new CustomAuthenticator());
             server.createContext("/login", new Handlers.LoginHandler());
 //            server.createContext("/echoHeader", new Handlers.EchoHeaderHandler());
 //            server.createContext("/echoGet", new Handlers.EchoGetHandler());

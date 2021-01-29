@@ -18,7 +18,7 @@ public class BaseRepository<T> {
     public T get(long id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         T result = session.get(entityClass, id);
-        session.close();
+
 
         return result;
     }
@@ -26,7 +26,7 @@ public class BaseRepository<T> {
     public List<T> getAll() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<T> results = session.createQuery("from " + entityClass.getName()).list();
-        session.close();
+
 
         return results;
     }
@@ -36,7 +36,7 @@ public class BaseRepository<T> {
         Transaction transaction = session.beginTransaction();
         session.saveOrUpdate(entity);
         transaction.commit();
-        session.close();
+
         return entity;
     }
 
@@ -45,7 +45,7 @@ public class BaseRepository<T> {
         Transaction transaction = session.beginTransaction();
         T dbEntity = (T) session.merge(entity);
         transaction.commit();
-        session.close();
+
         return dbEntity;
     }
 

@@ -42,8 +42,6 @@ public class Handlers {
     public static class GetAllUsersHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange he) throws IOException {
-            System.out.println(he.getPrincipal().getUsername());
-
             UserRepository repo = new UserRepository();
             try {
 
@@ -67,6 +65,7 @@ public class Handlers {
             //extracting query parameters
             String query = httpExchange.getRequestURI().getQuery();
             Map<String, String> params = queryToMap(query);
+            FileRepository fileRepository = new FileRepository();
 
             long userId = -1;
             try {
@@ -81,11 +80,10 @@ public class Handlers {
             UserRepository userRepository = new UserRepository();
             UserEntity fileOwner = userRepository.get(userId);
 
-            //todo: dehardcodat
-            UserEntity requestUser = userRepository.get(1);
+            UserEntity requestUser = userRepository.getUserByUsername(httpExchange.getPrincipal().getUsername());
 
             try {
-                List<FileDto> files = userRepository.getAllFilesCanAccessFrom(requestUser, fileOwner).stream().map(f -> new FileDto(f)).collect(Collectors.toList());
+                List<FileDto> files = fileRepository.getAllFilesCanAccessFrom(requestUser, fileOwner).stream().map(f -> new FileDto(f)).collect(Collectors.toList());
                 ObjectMapper objectMapper = new ObjectMapper();
                 String response = objectMapper.writeValueAsString(files);
                 httpExchange.sendResponseHeaders(200, response.length());
@@ -112,7 +110,7 @@ public class Handlers {
                 FilePermissionsRepository filePermissionsRepo = new FilePermissionsRepository();
                 PermissionTypeRepository permissionTypeRepo = new PermissionTypeRepository();
 
-                UserEntity currentUser = userRepository.get(1);
+                UserEntity currentUser = userRepository.getUserByUsername(httpExchange.getPrincipal().getUsername());
 
                 boolean isNewFile = fileDto.getId() == null;
 
@@ -121,7 +119,6 @@ public class Handlers {
                     fileEntity.setId(fileDto.getId());
                     fileEntity.setTitle(fileDto.getTitle());
                     fileEntity.setDateCreated(new Timestamp(new Date().getTime()));
-                    //todo: set current user
                     fileEntity.setUserByOwnerId(currentUser);
 
 
@@ -134,7 +131,6 @@ public class Handlers {
                 FileVersionEntity fileVersionEntity = new FileVersionEntity();
                 fileVersionEntity.setContents(fileDto.getLatestVersion().getContents());
                 fileVersionEntity.setModifiedOn(new Timestamp(new Date().getTime()));
-                //todo: set current user
 
                 fileVersionEntity.setUserByModifiedBy(currentUser);
                 fileVersionEntity.setFileByFileId(fileEntity);
