@@ -108,7 +108,7 @@ public class Handlers {
                 UserRepository userRepository = new UserRepository();
 
                 FileEntity fileEntity = new FileEntity();
-                if (fileDto.getId() == 0) {
+                if (fileDto.getId() == null) {
                     fileEntity.setId(fileDto.getId());
                     fileEntity.setTitle(fileDto.getTitle());
                     fileEntity.setDateCreated(new Timestamp(new Date().getTime()));
@@ -130,8 +130,8 @@ public class Handlers {
 
                 fileVersionEntity.setFileByFileId(fileEntity);
 
-
-                fileRepo.create(fileEntity);
+                FileEntity fe = fileRepo.create(fileEntity);
+                System.out.println(fe);
 
                 String response = "Saved successfully";
                 httpExchange.sendResponseHeaders(200, response.length());
