@@ -7,6 +7,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 
+import java.util.List;
+
 public class FileController {
     @FXML
     private Label lblLastModified;
@@ -15,7 +17,7 @@ public class FileController {
     @FXML
     private Button btnSave;
     @FXML
-    private Button btnEdit;
+    private Button btnDownload;
 
     private FileDto file;
 
@@ -35,6 +37,17 @@ public class FileController {
             }
         }
 
-        txtContents.setEditable(false);
+        setupAccordingToPermissions();
     }
+
+    private  void setupAccordingToPermissions(){
+        if(!file.getPermissions().contains("write")){
+            txtContents.setEditable(false);
+            txtContents.setDisable(true);
+            btnSave.setDisable(true);
+            btnDownload.setDisable(true);
+        }
+    }
+
+
 }

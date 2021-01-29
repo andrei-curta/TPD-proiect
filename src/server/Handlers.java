@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Handlers {
@@ -102,56 +99,55 @@ public class Handlers {
     }
 
     public static class AddFile implements HttpHandler {
-
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                FileDto fileDto = objectMapper.readValue(httpExchange.getRequestBody(), FileDto.class);
+                FileRepository fileRepo = new FileRepository();
+                UserRepository userRepository = new UserRepository();
 
-            //get object sent by client
-            ObjectMapper objectMapper = new ObjectMapper();
-            FileEntity file = objectMapper.readValue(httpExchange.getRequestBody(), FileEntity.class);
+                FileEntity fileEntity = new FileEntity();
+                if (fileDto.getId() == 0) {
+                    fileEntity.setId(fileDto.getId());
+                    fileEntity.setTitle(fileDto.getTitle());
+                    fileEntity.setDateCreated(new Timestamp(new Date().getTime()));
+                    //todo: set current user
+                    fileEntity.setUserByOwnerId(userRepository.get(1));
 
-            file.setDateCreated(new Timestamp(System.currentTimeMillis()));
-            //todo: set owner
+                } else {
+                    //todo: verificat daca are acces la ID
 
-            FileRepository fileRepository = new FileRepository();
-            FileEntity file_db = fileRepository.create(file);
+                    fileEntity = fileRepo.get(fileDto.getId());
+                }
 
-            //return created entity
-            String response = objectMapper.writeValueAsString(file_db);
-            httpExchange.sendResponseHeaders(200, response.length());
-            OutputStream os = httpExchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+                FileVersionEntity fileVersionEntity = new FileVersionEntity();
+                fileVersionEntity.setContents(fileDto.getLatestVersion().getContents());
+                fileVersionEntity.setModifiedOn(new Timestamp(new Date().getTime()));
+                //todo: set current user
+
+                fileVersionEntity.setUserByModifiedBy(userRepository.get(1));
+
+                fileVersionEntity.setFileByFileId(fileEntity);
+
+
+                fileRepo.create(fileEntity);
+
+                String response = "Saved successfully";
+                httpExchange.sendResponseHeaders(200, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } catch (Exception e) {
+                String response = e.getMessage();
+                httpExchange.sendResponseHeaders(500, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            }
         }
     }
 
-    public static class AddFileVersion implements HttpHandler {
-
-        @Override
-        public void handle(HttpExchange httpExchange) throws IOException {
-
-            //get object sent by client
-            ObjectMapper objectMapper = new ObjectMapper();
-            FileVersionEntity file = objectMapper.readValue(httpExchange.getRequestBody(), FileVersionEntity.class);
-
-
-            //Todo: check if the file belongs to the curent user
-
-            FileVersionRepository fileVersionRepository = new FileVersionRepository();
-            FileRepository fileRepository = new FileRepository();
-
-//            int latestVersion = file.getFileByFileId()
-
-            FileVersionEntity file_db = fileVersionRepository.create(file);
-
-            //return created entity
-            String response = objectMapper.writeValueAsString(file_db);
-            httpExchange.sendResponseHeaders(200, response.length());
-            OutputStream os = httpExchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
 
     public static Map<String, String> queryToMap(String query) {
         Map<String, String> result = new HashMap<>();

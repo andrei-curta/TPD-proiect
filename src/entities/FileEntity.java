@@ -88,4 +88,5 @@ public class FileEntity {
     public void setFileVersionsById(Collection<FileVersionEntity> fileVersionsById) {
         this.fileVersionsById = fileVersionsById;
     }
+
 }
