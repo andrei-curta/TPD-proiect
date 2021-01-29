@@ -4,6 +4,8 @@ import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
+import entities.UserEntity;
+import server.repository.UserRepository;
 
 import java.net.HttpCookie;
 import java.net.CookieHandler;
@@ -32,7 +34,11 @@ public class CustomAuthenticator extends Authenticator {
                 //se verifica daca cookie-ul cu session id-ul e creat de server
                 for (HttpCookie c : cookies) {
                     if (c.getValue().equals(sessionIdCookie.getValue())) {
-                        return new Success(new HttpPrincipal("USernamrew", "principal"));
+                        //se extrage userul care are asociat session cookie-ul si se salveaza in principal
+                        UserRepository userRepository = new UserRepository();
+                        long userId = TpdHttpsServer.sessionsUsers.get(sessionIdCookie.getValue());
+                        UserEntity currentUser = userRepository.get(userId);
+                        return new Success(new HttpPrincipal(currentUser.getUsername(), "user"));
                     }
                 }
             }

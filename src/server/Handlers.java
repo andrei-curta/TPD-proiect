@@ -25,8 +25,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Handlers {
-    private static Map<String, Long> sessionsUsers = new HashMap<>();
-    private static int sessionCounter = 0;
 
     public static class RootHandler implements HttpHandler {
 
@@ -44,7 +42,7 @@ public class Handlers {
     public static class GetAllUsersHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange he) throws IOException {
-//            he.getHttpContext().setAuthenticator()
+            System.out.println(he.getPrincipal().getUsername());
 
             UserRepository repo = new UserRepository();
             try {
@@ -127,7 +125,6 @@ public class Handlers {
                     fileEntity.setUserByOwnerId(currentUser);
 
 
-
                 } else {
                     //todo: verificat daca are acces la ID
 
@@ -145,7 +142,7 @@ public class Handlers {
                 FileEntity updatedFile = fileRepo.create(fileEntity);
 
                 //se dau permisiuni pe fisier daca este creat un fisier nou
-                if(isNewFile) {
+                if (isNewFile) {
                     List<PermissionTypeEntity> permissionTypeEntityList = permissionTypeRepo.getAll();
                     filePermissionsRepo.addFilePermissionsForUser(updatedFile, currentUser, permissionTypeEntityList);
                 }
@@ -195,17 +192,17 @@ public class Handlers {
             UserEntity user = userRepository.getUserByUsername(loginData.getUsername());
 
             if (user != null) {
-                sessionCounter++;
+                TpdHttpsServer.sessionCounter++;
                 String sessionId = Integer.toString((user.getId() +
-                        Integer.toString(sessionCounter) + new Timestamp(System.currentTimeMillis()).toString()).hashCode());
+                        Integer.toString(TpdHttpsServer.sessionCounter) + new Timestamp(System.currentTimeMillis()).toString()).hashCode());
                 cookie = new HttpCookie("sessionId", sessionId);
 
                 CookieManager cm = (CookieManager) CookieManager.getDefault();
                 cm.getCookieStore().add(null, cookie);
 
                 httpExchange.getResponseHeaders().add("Set-Cookie", cookie.toString());
-                sessionsUsers.put(sessionId, user.getId());
-                System.out.println(sessionsUsers.toString());
+                TpdHttpsServer.sessionsUsers.put(sessionId, user.getId());
+                System.out.println(TpdHttpsServer.sessionsUsers.toString());
 
                 String response = "Login successful " + sessionId;
                 httpExchange.sendResponseHeaders(200, response.length());
