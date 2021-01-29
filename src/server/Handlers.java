@@ -5,15 +5,11 @@ import DTO.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import entities.FileEntity;
-import entities.FileVersionEntity;
-import entities.UserEntity;
+import entities.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import server.repository.FileRepository;
-import server.repository.FileVersionRepository;
-import server.repository.UserRepository;
+import server.repository.*;
 import util.HibernateUtil;
 
 import javax.xml.ws.handler.Handler;
@@ -102,18 +98,29 @@ public class Handlers {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             try {
+
+
                 ObjectMapper objectMapper = new ObjectMapper();
                 FileDto fileDto = objectMapper.readValue(httpExchange.getRequestBody(), FileDto.class);
                 FileRepository fileRepo = new FileRepository();
                 UserRepository userRepository = new UserRepository();
+                FileVersionRepository fileVersionRepo = new FileVersionRepository();
+                FilePermissionsRepository filePermissionsRepo = new FilePermissionsRepository();
+                PermissionTypeRepository permissionTypeRepo = new PermissionTypeRepository();
+
+                UserEntity currentUser = userRepository.get(1);
+
+                boolean isNewFile = fileDto.getId() == null;
 
                 FileEntity fileEntity = new FileEntity();
-                if (fileDto.getId() == null) {
+                if (isNewFile) {
                     fileEntity.setId(fileDto.getId());
                     fileEntity.setTitle(fileDto.getTitle());
                     fileEntity.setDateCreated(new Timestamp(new Date().getTime()));
                     //todo: set current user
-                    fileEntity.setUserByOwnerId(userRepository.get(1));
+                    fileEntity.setUserByOwnerId(currentUser);
+
+
 
                 } else {
                     //todo: verificat daca are acces la ID
@@ -126,12 +133,18 @@ public class Handlers {
                 fileVersionEntity.setModifiedOn(new Timestamp(new Date().getTime()));
                 //todo: set current user
 
-                fileVersionEntity.setUserByModifiedBy(userRepository.get(1));
-
+                fileVersionEntity.setUserByModifiedBy(currentUser);
                 fileVersionEntity.setFileByFileId(fileEntity);
 
-                FileEntity fe = fileRepo.create(fileEntity);
-                System.out.println(fe);
+                FileEntity updatedFile = fileRepo.create(fileEntity);
+
+                //se dau permisiuni pe fisier daca este creat un fisier nou
+                if(isNewFile) {
+                    List<PermissionTypeEntity> permissionTypeEntityList = permissionTypeRepo.getAll();
+                    filePermissionsRepo.addFilePermissionsForUser(updatedFile, currentUser, permissionTypeEntityList);
+                }
+
+                fileVersionRepo.create(fileVersionEntity);
 
                 String response = "Saved successfully";
                 httpExchange.sendResponseHeaders(200, response.length());
