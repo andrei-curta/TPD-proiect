@@ -11,6 +11,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import server.repository.*;
+import sun.plugin.cache.FileVersion;
 import util.HibernateUtil;
 
 import javax.xml.ws.handler.Handler;
@@ -160,6 +161,62 @@ public class Handlers {
         }
     }
 
+    public static class DownloadFile implements HttpHandler {
+        @Override
+        public void handle(HttpExchange httpExchange) throws IOException {
+            try {
+
+                UserRepository userRepository = new UserRepository();
+                DownloadHistoryRepository downloadHistoryRepository = new DownloadHistoryRepository();
+                FileVersionRepository fileVersionRepository = new FileVersionRepository();
+                UserEntity currentUser = userRepository.getUserByUsername(httpExchange.getPrincipal().getUsername());
+
+                String query = httpExchange.getRequestURI().getQuery();
+                Map<String, String> params = queryToMap(query);
+
+                long fileVersionId = -1;
+                try {
+                    fileVersionId = Long.parseLong(params.get("fileVersionId"));
+                } catch (NumberFormatException e) {
+                    httpExchange.sendResponseHeaders(400, e.getMessage().length());
+                    OutputStream os = httpExchange.getResponseBody();
+                    os.write(e.getMessage().getBytes());
+                    os.close();
+                }
+
+                FileVersionEntity fileVersionEntity = fileVersionRepository.get(fileVersionId);
+                FileEntity file = fileVersionEntity.getFileByFileId();
+
+                if (downloadHistoryRepository.canDownloadFile(currentUser, file)) {
+
+                    byte[] response = fileVersionEntity.getContents().getBytes();
+                    OutputStream outputStream = httpExchange.getResponseBody();
+                    httpExchange.sendResponseHeaders(200, response.length);
+                    outputStream.write(response);
+                    outputStream.flush();
+                    outputStream.close();
+                    httpExchange.getRequestBody().close();
+
+                    String filename = file.getTitle();
+                    httpExchange.getResponseHeaders().add("Content-Disposition", "attachment; filename=" + filename);
+                } else {
+                    String response = "You can't download the file";
+                    httpExchange.sendResponseHeaders(401, response.length());
+                    OutputStream os = httpExchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+                }
+
+
+            } catch (Exception e) {
+                String response = e.getMessage();
+                httpExchange.sendResponseHeaders(500, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            }
+        }
+    }
 
     public static Map<String, String> queryToMap(String query) {
         Map<String, String> result = new HashMap<>();
