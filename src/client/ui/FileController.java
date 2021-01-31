@@ -5,11 +5,13 @@ import DTO.FileVersionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
+import util.CustomHttpException;
 import util.HttpRequestHelper;
 
 import java.io.File;
@@ -71,7 +73,6 @@ public class FileController {
                 Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @FXML
@@ -96,11 +97,14 @@ public class FileController {
                 saveTextToFile(resp, file);
             }
 
-        } catch (
-                Exception e) {
+        } catch (CustomHttpException ce) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Not allowed");
+            alert.setContentText(ce.getMessage());
+            alert.show();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
 

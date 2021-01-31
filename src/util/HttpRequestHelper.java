@@ -1,10 +1,7 @@
 package util;
 
 import javax.net.ssl.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -45,6 +42,44 @@ public class HttpRequestHelper {
         }
     }
 
+
+    private static String readStream(InputStream stream) throws IOException {
+        StringBuilder builder = new StringBuilder();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(stream))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                builder.append(line); // + "\r\n"(no need, json has no line breaks!)
+            }
+            in.close();
+        }
+        return builder.toString();
+    }
+
+    private static String processResponse(HttpsURLConnection conn) throws CustomHttpException {
+        try {
+
+            if (conn.getResponseCode() > 209 || conn.getResponseCode() < 200) {
+                throw new CustomHttpException(readStream(conn.getErrorStream()), conn.getResponseCode());
+            } else {
+                return readStream(conn.getInputStream());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String get(String urlPath) throws Exception {
+
+        doFix();
+        URL url = new URL(urlPath);//your url to fetch data from
+        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Accept", "application/json");
+
+        return processResponse(conn);
+    }
+
     public static String post(String urlPath, String payload) throws Exception {
         doFix();
         URL url = new URL(urlPath);//your url to fetch data from
@@ -58,41 +93,7 @@ public class HttpRequestHelper {
             os.write(input, 0, input.length);
         }
 
-        return getResponse(conn);
+        return processResponse(conn);
     }
 
-    private static String getResponse(HttpsURLConnection conn)  {
-        try {
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
-            BufferedReader br = new BufferedReader(in);
-            String output;
-            String token = "";
-            while ((output = br.readLine()) != null) {
-                token = output;
-            }
-
-            conn.disconnect();
-
-            return token;
-        }catch (Exception e){
-            System.out.println("exception in: " + conn.getURL().toString());
-            e.printStackTrace();
-        }
-        return  null;
-    }
-
-    public static String get(String urlPath) throws Exception {
-
-        doFix();
-        URL url = new URL(urlPath);//your url to fetch data from
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Accept", "application/json");
-        if (conn.getResponseCode() != 200) {
-            throw new RuntimeException("Failed : HTTP Error code : "
-                    + conn.getResponseCode());
-        }
-
-        return getResponse(conn);
-    }
 }

@@ -199,6 +199,13 @@ public class Handlers {
 
                     String filename = file.getTitle();
                     httpExchange.getResponseHeaders().add("Content-Disposition", "attachment; filename=" + filename);
+
+                    DownloadHistoryEntity downloadHistoryEntry = new DownloadHistoryEntity();
+                    downloadHistoryEntry.setUserByUserId(currentUser);
+                    downloadHistoryEntry.setFileVersionByFileVersionId(fileVersionEntity);
+                    downloadHistoryEntry.setDate(new Timestamp(new Date().getTime()));
+
+                    downloadHistoryRepository.create(downloadHistoryEntry);
                 } else {
                     String response = "You can't download the file";
                     httpExchange.sendResponseHeaders(401, response.length());
