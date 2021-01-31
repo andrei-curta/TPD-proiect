@@ -5,19 +5,25 @@ import DTO.FileVersionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
+import util.Crypto;
 import util.CustomHttpException;
 import util.HttpRequestHelper;
 
 import java.io.File;
 import java.io.PrintWriter;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class FileController {
+    @FXML
+    private Button btnDecrypt;
+    @FXML
+    private PasswordField pwdDecrypt;
+    @FXML
+    private Label lblTitle;
     @FXML
     private Label lblLastModified;
     @FXML
@@ -28,6 +34,7 @@ public class FileController {
     private Button btnDownload;
 
     private FileDto file;
+    private boolean successfullyDecrypted = false;
 
     public void initData(FileDto file) {
         this.file = file;
@@ -39,6 +46,8 @@ public class FileController {
                     txtContents.setText(latestVersion.getContents());
                     lblLastModified.setText("Last modified by: " + latestVersion.getModifiedBy() + " on: " + latestVersion.getModifiedOn().toString());
                 }
+
+                lblTitle.setText(file.getTitle());
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -60,15 +69,32 @@ public class FileController {
     @FXML
     private void save(ActionEvent event) {
         try {
-
-            ObjectMapper mapper = new ObjectMapper();
-
             ObjectMapper objectMapper = new ObjectMapper();
+
+            if (pwdDecrypt.getText().length() == 0) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Not allowed");
+                alert.setContentText("Password cannot be empty");
+                alert.show();
+                return;
+            }
+
+//            if (file.getId() != null && successfullyDecrypted == false){
+//                Alert alert = new Alert(Alert.AlertType.WARNING);
+//                alert.setTitle("Not allowed");
+//                alert.setContentText("You must first decrypt the message");
+//                alert.show();
+//                return;
+//            }
+
+            //encrypt content before sending to the server
+            String encryptedContent = Crypto.encrypt(file.getLatestVersion().getContents().getBytes(UTF_8), pwdDecrypt.getText());
+            file.getLatestVersion().setContents(encryptedContent);
+
             String payload = objectMapper.writeValueAsString(file);
 
             String resp = HttpRequestHelper.post("https://localhost:9000/files/add", payload);
             System.out.println(resp);
-
         } catch (
                 Exception e) {
             e.printStackTrace();
@@ -116,6 +142,23 @@ public class FileController {
             writer.close();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void decrypt(ActionEvent event) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+
+            String payload = objectMapper.writeValueAsString(file);
+
+            String resp = HttpRequestHelper.post("https://localhost:9000/files/add", payload);
+            System.out.println(resp);
+
+        } catch (
+                Exception e) {
+            e.printStackTrace();
         }
     }
 
