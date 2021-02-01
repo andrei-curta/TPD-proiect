@@ -24,6 +24,7 @@ import javax.net.ssl.TrustManagerFactory;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
+import util.HibernateUtil;
 
 
 public class TpdHttpsServer {

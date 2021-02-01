@@ -84,7 +84,8 @@ public class Handlers {
             UserEntity requestUser = userRepository.getUserByUsername(httpExchange.getPrincipal().getUsername());
 
             try {
-                List<FileDto> files = fileRepository.getAllFilesCanAccessFrom(requestUser, fileOwner).stream().map(f -> new FileDto(f)).collect(Collectors.toList());
+                List<FileEntity> filesCanAccess = fileRepository.getAllFilesCanAccessFrom(requestUser, fileOwner);
+                List<FileDto> files = filesCanAccess.stream().map(f -> new FileDto(f)).collect(Collectors.toList());
                 ObjectMapper objectMapper = new ObjectMapper();
                 String response = objectMapper.writeValueAsString(files);
                 httpExchange.sendResponseHeaders(200, response.length());
@@ -121,8 +122,6 @@ public class Handlers {
                     fileEntity.setTitle(fileDto.getTitle());
                     fileEntity.setDateCreated(new Timestamp(new Date().getTime()));
                     fileEntity.setUserByOwnerId(currentUser);
-
-
                 } else {
                     //todo: verificat daca are acces la ID
 
@@ -132,6 +131,19 @@ public class Handlers {
                 FileVersionEntity fileVersionEntity = new FileVersionEntity();
                 fileVersionEntity.setContents(fileDto.getLatestVersion().getContents());
                 fileVersionEntity.setModifiedOn(new Timestamp(new Date().getTime()));
+
+                //get version number
+                if (isNewFile) {
+                    fileVersionEntity.setVersionNumber(1);
+                } else {
+                    FileVersionEntity latestVersion = fileEntity.getLatestVersion();
+                    Integer latestVersionNr = 0;
+
+                    if (latestVersion != null) {
+                        latestVersionNr = latestVersion.getVersionNumber();
+                    }
+                    fileVersionEntity.setVersionNumber(latestVersionNr + 1);
+                }
 
                 fileVersionEntity.setUserByModifiedBy(currentUser);
                 fileVersionEntity.setFileByFileId(fileEntity);

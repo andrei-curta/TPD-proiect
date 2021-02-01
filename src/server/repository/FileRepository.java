@@ -23,9 +23,14 @@ public class FileRepository extends BaseRepository<FileEntity> {
 
     public List<FileEntity> getAllFilesCanAccessFrom(UserEntity requestUser, UserEntity owner) {
         try {
-            List<FileEntity> files = getFilesByUser(owner);
 
-            return files.stream().filter(f -> f.getFilePermissionsById().stream().anyMatch(p -> p.getUserByUserId().equals(requestUser))).collect(Collectors.toList());
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List<FileEntity> files = session.createQuery("from FileEntity where userByOwnerId = :usr").setParameter("usr", requestUser).list();
+
+            List<FileEntity> returnFiles = files.stream().filter(f -> f.getFilePermissionsById().stream().anyMatch(p -> p.getUserByUserId().equals(requestUser))).collect(Collectors.toList());
+            session.close();
+
+            return returnFiles;
         } catch (Exception e) {
             e.printStackTrace();
         }

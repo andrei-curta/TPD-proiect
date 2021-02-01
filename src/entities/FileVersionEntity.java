@@ -1,5 +1,8 @@
 package entities;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -84,6 +87,7 @@ public class FileVersionEntity {
 
     @ManyToOne
     @JoinColumn(name = "file_id", referencedColumnName = "id", nullable = false)
+    @Fetch(FetchMode.SELECT)
     public FileEntity getFileByFileId() {
         return fileByFileId;
     }
@@ -94,6 +98,7 @@ public class FileVersionEntity {
 
     @ManyToOne
     @JoinColumn(name = "modified_by", referencedColumnName = "id", nullable = false)
+    @Fetch(FetchMode.SELECT)
     public UserEntity getUserByModifiedBy() {
         return userByModifiedBy;
     }

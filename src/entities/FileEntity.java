@@ -1,9 +1,16 @@
 package entities;
 
+import DTO.FileVersionDto;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "file", schema = "tpd", catalog = "")
@@ -17,7 +24,7 @@ public class FileEntity {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long getId() {
         return id;
     }
@@ -72,6 +79,7 @@ public class FileEntity {
     }
 
     @OneToMany(mappedBy = "fileByFileId")
+    @Fetch(FetchMode.SELECT)
     public Collection<FilePermissionEntity> getFilePermissionsById() {
         return filePermissionsById;
     }
@@ -80,7 +88,7 @@ public class FileEntity {
         this.filePermissionsById = filePermissionsById;
     }
 
-    @OneToMany(mappedBy = "fileByFileId")
+    @OneToMany(mappedBy = "fileByFileId", fetch = FetchType.EAGER)
     public Collection<FileVersionEntity> getFileVersionsById() {
         return fileVersionsById;
     }
@@ -89,4 +97,11 @@ public class FileEntity {
         this.fileVersionsById = fileVersionsById;
     }
 
+    @Transient
+    public FileVersionEntity getLatestVersion() {
+        List<FileVersionEntity> versions = getFileVersionsById().stream().sorted(Comparator.comparing(FileVersionEntity::getVersionNumber)).collect(Collectors.toList());
+        if (versions.size() > 0) {
+            return versions.get(versions.size() - 1);
+        } else return null;
+    }
 }
