@@ -23,6 +23,8 @@ public class TpdHttpsServer {
     public static Map<String, Long> sessionsUsers = new HashMap<>();
     public static int sessionCounter = 0;
 
+    public static Map<String, AuthData> authTokens = new HashMap<>();
+
     public void start(int port) {
         try {
 
@@ -84,6 +86,7 @@ public class TpdHttpsServer {
             server.createContext("/files/add", new Handlers.AddFile()).setAuthenticator(new CustomAuthenticator());
             server.createContext("/file/download", new Handlers.DownloadFile()).setAuthenticator(new CustomAuthenticator());
             server.createContext("/login", new Handlers.LoginHandler());
+            server.createContext("/token", new Handlers.TokenHandler());
 //            server.createContext("/echoHeader", new Handlers.EchoHeaderHandler());
 //            server.createContext("/echoGet", new Handlers.EchoGetHandler());
 //            server.createContext("/echoPost", new Handlers.EchoPostHandler());

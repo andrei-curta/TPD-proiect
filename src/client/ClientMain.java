@@ -43,17 +43,12 @@ public class ClientMain extends Application {
             System.out.println("initial cookies");
             cookieManager.getCookieStore().getCookies().forEach(cookie -> System.out.println(cookie.getName()));
 
-            String resp = HttpRequestHelper.post("https://localhost:9000/login", "{\"username\": \"test\"}");
-            System.out.println(resp);
-
-            cookieManager.getCookieStore().getCookies().forEach(cookie -> System.out.println(cookie.getName()));
-
-            System.out.println("after resp");
-            System.out.println(resp);
+//            String resp = HttpRequestHelper.post("https://localhost:9000/login", "{\"username\": \"test\"}");
+//            System.out.println(resp);
 
 
-            primaryStage.setTitle("List View Example");
-            Parent root = FXMLLoader.load(getClass().getResource("./ui/UserListView.fxml"));
+            primaryStage.setTitle("Login");
+            Parent root = FXMLLoader.load(getClass().getResource("./ui/LoginView.fxml"));
             primaryStage.setScene(new Scene(root));
             primaryStage.show();
         } catch (Exception e) {

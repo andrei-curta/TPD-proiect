@@ -17,11 +17,8 @@ import javax.mail.internet.MimeMessage;
 
 public class EmailClient {
 
-    public static String SendTokenEmail(String to) {
-        // Sender's email ID needs to be mentioned
+    public static void sendMail(String mailTo, String subject, String text) throws MessagingException {
         String from = "app@tpd.com";
-
-        // Assuming you are sending email from through gmails smtp
         String host = "127.0.0.1";
 
         // Get system properties
@@ -33,7 +30,6 @@ public class EmailClient {
         properties.put("mail.smtp.ssl.enable", "false");
         properties.put("mail.smtp.auth", "false");
 
-        // Get the Session object.// and pass username and password
         Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
 
         });
@@ -49,33 +45,22 @@ public class EmailClient {
             message.setFrom(new InternetAddress(from));
 
             // Set To: header field of the header.
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(mailTo));
 
             // Set Subject: header field
-            message.setSubject("Your Token");
-
-            String token = generate();
+            message.setSubject(subject);
 
             // Now set the actual message
-            message.setText("This is your token: " + token);
+            message.setText(text);
 
             System.out.println("sending...");
             // Send message
             Transport.send(message);
             System.out.println("Sent message successfully....");
 
-            return token;
+        } catch (MessagingException mex) {
+            System.out.println("The recipient address " + mailTo + " is not a valid RFC-5321 address");
+            throw mex;
         }
-        catch (MessagingException mex) {
-            return "The recipient address " + to + " is not a valid RFC-5321 address";
-        }
-
-    }
-
-    private static String generate() {
-        String uuid = UUID.randomUUID().toString();
-        uuid = uuid.substring(0, 8);
-
-        return uuid;
     }
 }

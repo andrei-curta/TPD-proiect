@@ -12,6 +12,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import server.repository.*;
 import sun.plugin.cache.FileVersion;
+import util.EmailClient;
 import util.HibernateUtil;
 
 import javax.xml.ws.handler.Handler;
@@ -24,6 +25,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 public class Handlers {
 
@@ -250,6 +252,53 @@ public class Handlers {
         return result;
     }
 
+    /**
+     * sends an email with a token
+     */
+    public static class TokenHandler implements HttpHandler {
+
+        @Override
+        public void handle(HttpExchange httpExchange) throws IOException {
+
+            String query = httpExchange.getRequestURI().getQuery();
+            Map<String, String> params = queryToMap(query);
+
+            String username = params.get("username");
+            if (username != null) {
+
+                // Adding 10 mins using Date constructor.
+                Calendar date = Calendar.getInstance();
+                long timeInSecs = date.getTimeInMillis();
+                int tokenValidityMinutes = 5;
+                Date tokenValidUntil = new Date(timeInSecs + (tokenValidityMinutes * 10 * 60 * 1000));
+
+                UUID uuid = UUID.randomUUID();
+                String token = uuid.toString();
+
+                TpdHttpsServer.authTokens.put(token, new AuthData(username, tokenValidUntil));
+
+                String subject = "Your token";
+                String text = "Your token valid for " + tokenValidityMinutes + "minutes is: " + token;
+
+                EmailClient emailClient = new EmailClient();
+                try {
+                    emailClient.sendMail(username, subject, text);
+                } catch (Exception e) {
+                    String response = "Mail could not be sent";
+                    httpExchange.sendResponseHeaders(500, response.length());
+                    OutputStream os = httpExchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+                }
+                String response = "Mail successfully sent";
+                httpExchange.sendResponseHeaders(200, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            }
+        }
+    }
+
     public static class LoginHandler implements HttpHandler {
 
         UserRepository userRepository = new UserRepository();
@@ -260,8 +309,19 @@ public class Handlers {
             ObjectMapper objectMapper = new ObjectMapper();
             LoginDto loginData = objectMapper.readValue(httpExchange.getRequestBody(), LoginDto.class);
 
+            //check if the token is valid and not expired
+            AuthData authData = TpdHttpsServer.authTokens.get(loginData.getToken());
+            if (authData == null || authData.isValid() == false) {
+                String response = "Login failed. Invalid token";
+                httpExchange.sendResponseHeaders(401, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+                return;
+            }
+
             HttpCookie cookie;
-            UserEntity user = userRepository.getUserByUsername(loginData.getUsername());
+            UserEntity user = userRepository.getUserByUsername(authData.getUsername());
 
             if (user != null) {
                 TpdHttpsServer.sessionCounter++;
@@ -281,6 +341,9 @@ public class Handlers {
                 OutputStream os = httpExchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
+
+                //remove the token so it cannot be used
+                TpdHttpsServer.authTokens.remove(loginData.getToken());
 
             } else {
                 String response = "Login failed";
