@@ -12,6 +12,7 @@ import util.Crypto;
 import util.CustomHttpException;
 import util.HttpRequestHelper;
 
+import javax.crypto.AEADBadTagException;
 import java.io.File;
 import java.io.PrintWriter;
 
@@ -148,16 +149,22 @@ public class FileController {
     @FXML
     private void decrypt(ActionEvent event) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                String decryptedContent = Crypto.decrypt(file.getLatestVersion().getContents(), pwdDecrypt.getText());
 
+                file.getLatestVersion().setContents(decryptedContent);
+                txtContents.setText(decryptedContent);
+                successfullyDecrypted = true;
+            } catch (AEADBadTagException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Not allowed");
+                alert.setContentText(e.getMessage());
+                alert.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            String payload = objectMapper.writeValueAsString(file);
-
-            String resp = HttpRequestHelper.post("https://localhost:9000/files/add", payload);
-            System.out.println(resp);
-
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
