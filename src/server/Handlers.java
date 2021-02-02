@@ -270,7 +270,7 @@ public class Handlers {
                 Calendar date = Calendar.getInstance();
                 long timeInSecs = date.getTimeInMillis();
                 int tokenValidityMinutes = 5;
-                Date tokenValidUntil = new Date(timeInSecs + (tokenValidityMinutes * 10 * 60 * 1000));
+                Date tokenValidUntil = new Date(timeInSecs + (tokenValidityMinutes * 60 * 1000));
 
                 UUID uuid = UUID.randomUUID();
                 String token = uuid.toString();

@@ -32,7 +32,7 @@ public class AuthData {
     }
 
     public boolean isValid() {
-        Calendar date = Calendar.getInstance();
-        return date.before(validUntil);
+        Date currentDate = new Date();
+        return currentDate.before(validUntil);
     }
 }
