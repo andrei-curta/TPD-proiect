@@ -5,11 +5,17 @@ import DTO.FileVersionDto;
 import DTO.UserFilePermissionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 import util.Crypto;
 import util.CustomHttpException;
 import util.HttpRequestHelper;
@@ -22,6 +28,8 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class FileController {
+
+
     @FXML
     private Button btnDecrypt;
     @FXML
@@ -36,6 +44,13 @@ public class FileController {
     private Button btnSave;
     @FXML
     private Button btnDownload;
+
+    @FXML
+    private TableView tblPermissions;
+    @FXML
+    private TableColumn permissionUsername;
+    @FXML
+    private TableColumn permissionName;
 
     private FileDto file;
     private boolean successfullyDecrypted = false;
@@ -80,6 +95,13 @@ public class FileController {
                     .constructCollectionType(List.class, UserFilePermissionDto.class);
             userFilePermissions = mapper.readValue(resp, javaType);
             System.out.println(userFilePermissions);
+
+            ObservableList<UserFilePermissionDto> permissionDtoObservableList = FXCollections.observableArrayList(userFilePermissions);
+
+            permissionUsername.setCellValueFactory(new PropertyValueFactory<UserFilePermissionDto, String>("username"));
+            permissionName.setCellValueFactory(new PropertyValueFactory<UserFilePermissionDto, String>("permissionTypeName"));
+            tblPermissions.getItems().setAll(permissionDtoObservableList);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

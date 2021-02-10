@@ -308,14 +308,18 @@ public class Handlers {
             Map<String, String> params = queryToMap(query);
             FileRepository fileRepository = new FileRepository();
 
-
             if (httpExchange.getRequestMethod().equals("GET") && params.get("fileId") != null) {
                 try {
+                    Long fileId = Long.parseLong(params.get("fileId"));
 
-                    FilePermissionsRepository filePermissionsRepository = new FilePermissionsRepository();
-                    List<FilePermissionEntity> filePermissions = filePermissionsRepository.filePermissions(Long.parseLong(params.get("fileId")));
-                    List<UserFilePermissionDto> files = filePermissions.stream().map(f -> new UserFilePermissionDto(f)).collect(Collectors.toList());
-
+                    FileEntity fileEntity = fileRepository.get(fileId);
+                    List<UserFilePermissionDto> files = new ArrayList<UserFilePermissionDto>();
+                    //only the owner can see the permissions
+                    if (fileEntity.getUserByOwnerId().getUsername().equals(httpExchange.getPrincipal().getUsername())) {
+                        FilePermissionsRepository filePermissionsRepository = new FilePermissionsRepository();
+                        List<FilePermissionEntity> filePermissions = filePermissionsRepository.filePermissions(fileId);
+                        files = filePermissions.stream().map(f -> new UserFilePermissionDto(f)).collect(Collectors.toList());
+                    }
                     ObjectMapper objectMapper = new ObjectMapper();
                     String response = objectMapper.writeValueAsString(files);
                     System.out.println(response);
@@ -326,36 +330,6 @@ public class Handlers {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-
-//            long userId = -1;
-//            try {
-//                userId = Long.parseLong(params.get("userid"));
-//            } catch (NumberFormatException e) {
-//                httpExchange.sendResponseHeaders(400, e.getMessage().length());
-//                OutputStream os = httpExchange.getResponseBody();
-//                os.write(e.getMessage().getBytes());
-//                os.close();
-//            }
-//
-//            UserRepository userRepository = new UserRepository();
-//            UserEntity fileOwner = userRepository.get(userId);
-//
-//            UserEntity requestUser = userRepository.getUserByUsername(httpExchange.getPrincipal().getUsername());
-//
-//            try {
-//                List<FileEntity> filesCanAccess = fileRepository.getAllFilesCanAccessFrom(requestUser, fileOwner);
-//                List<FileDto> files = filesCanAccess.stream().map(f -> new FileDto(f)).collect(Collectors.toList());
-//                ObjectMapper objectMapper = new ObjectMapper();
-//                String response = objectMapper.writeValueAsString(files);
-//                System.out.println(response);
-//                httpExchange.sendResponseHeaders(200, response.length());
-//                OutputStream os = httpExchange.getResponseBody();
-//                os.write(response.getBytes());
-//                os.close();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
             }
         }
     }
