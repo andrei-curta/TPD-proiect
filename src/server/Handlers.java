@@ -3,6 +3,7 @@ package server;
 import DTO.FileDto;
 import DTO.LoginDto;
 import DTO.UserDto;
+import DTO.UserFilePermissionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -299,6 +300,66 @@ public class Handlers {
         }
     }
 
+    public static class Permissions implements HttpHandler {
+        @Override
+        public void handle(HttpExchange httpExchange) throws IOException {
+            //extracting query parameters
+            String query = httpExchange.getRequestURI().getQuery();
+            Map<String, String> params = queryToMap(query);
+            FileRepository fileRepository = new FileRepository();
+
+
+            if (httpExchange.getRequestMethod().equals("GET") && params.get("fileId") != null) {
+                try {
+
+                    FilePermissionsRepository filePermissionsRepository = new FilePermissionsRepository();
+                    List<FilePermissionEntity> filePermissions = filePermissionsRepository.filePermissions(Long.parseLong(params.get("fileId")));
+                    List<UserFilePermissionDto> files = filePermissions.stream().map(f -> new UserFilePermissionDto(f)).collect(Collectors.toList());
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String response = objectMapper.writeValueAsString(files);
+                    System.out.println(response);
+                    httpExchange.sendResponseHeaders(200, response.length());
+                    OutputStream os = httpExchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+//            long userId = -1;
+//            try {
+//                userId = Long.parseLong(params.get("userid"));
+//            } catch (NumberFormatException e) {
+//                httpExchange.sendResponseHeaders(400, e.getMessage().length());
+//                OutputStream os = httpExchange.getResponseBody();
+//                os.write(e.getMessage().getBytes());
+//                os.close();
+//            }
+//
+//            UserRepository userRepository = new UserRepository();
+//            UserEntity fileOwner = userRepository.get(userId);
+//
+//            UserEntity requestUser = userRepository.getUserByUsername(httpExchange.getPrincipal().getUsername());
+//
+//            try {
+//                List<FileEntity> filesCanAccess = fileRepository.getAllFilesCanAccessFrom(requestUser, fileOwner);
+//                List<FileDto> files = filesCanAccess.stream().map(f -> new FileDto(f)).collect(Collectors.toList());
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                String response = objectMapper.writeValueAsString(files);
+//                System.out.println(response);
+//                httpExchange.sendResponseHeaders(200, response.length());
+//                OutputStream os = httpExchange.getResponseBody();
+//                os.write(response.getBytes());
+//                os.close();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+            }
+        }
+    }
+
     public static class LoginHandler implements HttpHandler {
 
         UserRepository userRepository = new UserRepository();
@@ -310,7 +371,7 @@ public class Handlers {
             LoginDto loginData = objectMapper.readValue(httpExchange.getRequestBody(), LoginDto.class);
 
             //check if the token is valid and not expired
-          //  AuthData authData = TpdHttpsServer.authTokens.get(loginData.getToken());
+            //  AuthData authData = TpdHttpsServer.authTokens.get(loginData.getToken());
 //            if (authData == null || authData.isValid() == false) {
 //                String response = "Login failed. Invalid token";
 //                httpExchange.sendResponseHeaders(401, response.length());
@@ -322,7 +383,7 @@ public class Handlers {
 
             HttpCookie cookie;
             //todo: reparet
-           // UserEntity user = userRepository.getUserByUsername(authData.getUsername());
+            // UserEntity user = userRepository.getUserByUsername(authData.getUsername());
             UserEntity user = userRepository.get(1);
 
             if (user != null) {

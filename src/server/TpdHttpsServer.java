@@ -85,6 +85,7 @@ public class TpdHttpsServer {
             server.createContext("/files/get", new Handlers.GetFiles()).setAuthenticator(new CustomAuthenticator());
             server.createContext("/files/add", new Handlers.AddFile()).setAuthenticator(new CustomAuthenticator());
             server.createContext("/file/download", new Handlers.DownloadFile()).setAuthenticator(new CustomAuthenticator());
+            server.createContext("/permissions", new Handlers.Permissions()).setAuthenticator(new CustomAuthenticator());
             server.createContext("/login", new Handlers.LoginHandler());
             server.createContext("/token", new Handlers.TokenHandler());
 //            server.createContext("/echoHeader", new Handlers.EchoHeaderHandler());

@@ -2,7 +2,9 @@ package client.ui;
 
 import DTO.FileDto;
 import DTO.FileVersionDto;
+import DTO.UserFilePermissionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -15,6 +17,7 @@ import util.HttpRequestHelper;
 import javax.crypto.AEADBadTagException;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -36,6 +39,7 @@ public class FileController {
 
     private FileDto file;
     private boolean successfullyDecrypted = false;
+    private List<UserFilePermissionDto> userFilePermissions;
 
     public void initData(FileDto file) {
         this.file = file;
@@ -49,10 +53,10 @@ public class FileController {
                 }
 
                 lblTitle.setText(file.getTitle());
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            loadUserFilePermissions(file.getId());
         }
 
         setupAccordingToPermissions();
@@ -64,6 +68,20 @@ public class FileController {
             txtContents.setDisable(true);
             btnSave.setDisable(true);
             btnDownload.setDisable(true);
+        }
+    }
+
+    private void loadUserFilePermissions(long fileId) {
+        try {
+            String resp = HttpRequestHelper.get("https://localhost:9000/permissions?fileId=" + fileId);
+            System.out.println(resp);
+            ObjectMapper mapper = new ObjectMapper();
+            CollectionType javaType = mapper.getTypeFactory()
+                    .constructCollectionType(List.class, UserFilePermissionDto.class);
+            userFilePermissions = mapper.readValue(resp, javaType);
+            System.out.println(userFilePermissions);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -80,7 +98,7 @@ public class FileController {
                 return;
             }
 
-            if (file.getId() == null || !successfullyDecrypted){
+            if (file.getId() == null || !successfullyDecrypted) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Not allowed");
                 alert.setContentText("You must first decrypt the message");

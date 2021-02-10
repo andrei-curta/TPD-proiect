@@ -22,6 +22,14 @@ public class FilePermissionsRepository extends BaseRepository<FilePermissionEnti
         return list.stream().map(f -> f.getPermissionTypeByPermissionTypeId().getName()).collect(Collectors.toList());
     }
 
+    public List<FilePermissionEntity> filePermissions(long fileId) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        List<FilePermissionEntity> list = session.createQuery("from FilePermissionEntity where fileByFileId.id = :fileId").setParameter("fileId", fileId).list();
+//        return list.stream().map(f -> f.getPermissionTypeByPermissionTypeId().getName()).collect(Collectors.toList());
+        return list;
+    }
+
     public void addFilePermissionsForUser(FileEntity file, UserEntity user, List<PermissionTypeEntity> permissions) {
         for (PermissionTypeEntity permission : permissions) {
             FilePermissionEntity filePermission = new FilePermissionEntity();
