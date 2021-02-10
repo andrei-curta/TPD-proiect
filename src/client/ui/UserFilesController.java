@@ -5,6 +5,8 @@ import DTO.FileDto;
 import DTO.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Callback;
 import util.HttpRequestHelper;
 
 import java.io.IOException;
@@ -34,9 +37,15 @@ public class UserFilesController {
     private TableView<FileDto> tblFiles;
     @FXML
     private TableColumn<FileDto, String> title;
+    @FXML
+    private TableColumn<FileDto, String> owner;
+    @FXML
+    private TableColumn versionNo;
+    @FXML
+    public TableColumn lastModified;
 
 
-    public void initData(UserDto user){
+    public void initData(UserDto user) {
         System.out.println("in init data : " + user);
         currentPageUser = user;
         List<FileDto> files = null;
@@ -51,7 +60,35 @@ public class UserFilesController {
             e.printStackTrace();
         }
         ObservableList<FileDto> fileDtoObservableList = FXCollections.observableArrayList(files);
+        //set the contents of the columns
         title.setCellValueFactory(new PropertyValueFactory<FileDto, String>("title"));
+        owner.setCellValueFactory(new PropertyValueFactory<FileDto, String>("createdBy"));
+
+        //sets value in column based on class property
+        versionNo.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<FileDto, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<FileDto, String> p) {
+                if (p.getValue() != null) {
+                    return new SimpleStringProperty(p.getValue().getLatestVersion().getVersionNumber().toString());
+                } else {
+                    return new SimpleStringProperty("<no name>");
+                }
+            }
+        });
+
+        lastModified.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<FileDto, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<FileDto, String> p) {
+                if (p.getValue() != null) {
+                    return new SimpleStringProperty(p.getValue().getLatestVersion().getModifiedOn().toString());
+                } else {
+                    return new SimpleStringProperty("<no name>");
+                }
+            }
+        });
+
+
+
         tblFiles.getItems().setAll(fileDtoObservableList);
     }
 

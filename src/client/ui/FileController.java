@@ -45,7 +45,7 @@ public class FileController {
 
                 if (latestVersion != null) {
                     txtContents.setText(latestVersion.getContents());
-                    lblLastModified.setText("Version: " + latestVersion.getVersionNumber() + "| Last modified by: " + latestVersion.getModifiedBy() + " on: " + latestVersion.getModifiedOn().toString());
+                    lblLastModified.setText("Version: " + latestVersion.getVersionNumber() + "  |   Last modified by: " + latestVersion.getModifiedBy() + " on: " + latestVersion.getModifiedOn().toString());
                 }
 
                 lblTitle.setText(file.getTitle());
