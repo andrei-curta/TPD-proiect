@@ -60,8 +60,7 @@ public class UserFilesController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FileView.fxml"));
             Parent root1 = (Parent) fxmlLoader.load();
             Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initStyle(StageStyle.UNDECORATED);
+
             stage.setTitle("File");
             stage.setScene(new Scene(root1));
             //pass data to the controller

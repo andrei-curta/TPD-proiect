@@ -45,7 +45,7 @@ public class FileController {
 
                 if (latestVersion != null) {
                     txtContents.setText(latestVersion.getContents());
-                    lblLastModified.setText("Last modified by: " + latestVersion.getModifiedBy() + " on: " + latestVersion.getModifiedOn().toString());
+                    lblLastModified.setText("Version: " + latestVersion.getVersionNumber() + "| Last modified by: " + latestVersion.getModifiedBy() + " on: " + latestVersion.getModifiedOn().toString());
                 }
 
                 lblTitle.setText(file.getTitle());
@@ -80,13 +80,13 @@ public class FileController {
                 return;
             }
 
-//            if (file.getId() != null && successfullyDecrypted == false){
-//                Alert alert = new Alert(Alert.AlertType.WARNING);
-//                alert.setTitle("Not allowed");
-//                alert.setContentText("You must first decrypt the message");
-//                alert.show();
-//                return;
-//            }
+            if (file.getId() == null || !successfullyDecrypted){
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Not allowed");
+                alert.setContentText("You must first decrypt the message");
+                alert.show();
+                return;
+            }
 
             //encrypt content before sending to the server
             String encryptedContent = Crypto.encrypt(file.getLatestVersion().getContents().getBytes(UTF_8), pwdDecrypt.getText());

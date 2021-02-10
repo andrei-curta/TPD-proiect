@@ -90,6 +90,7 @@ public class Handlers {
                 List<FileDto> files = filesCanAccess.stream().map(f -> new FileDto(f)).collect(Collectors.toList());
                 ObjectMapper objectMapper = new ObjectMapper();
                 String response = objectMapper.writeValueAsString(files);
+                System.out.println(response);
                 httpExchange.sendResponseHeaders(200, response.length());
                 OutputStream os = httpExchange.getResponseBody();
                 os.write(response.getBytes());
@@ -104,7 +105,6 @@ public class Handlers {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             try {
-
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 FileDto fileDto = objectMapper.readValue(httpExchange.getRequestBody(), FileDto.class);

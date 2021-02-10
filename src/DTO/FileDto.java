@@ -32,14 +32,12 @@ public class FileDto {
         dateCreated = fileEntity.getDateCreated();
         createdBy = fileEntity.getUserByOwnerId().getUsername();
 
-        List<FileVersionDto> versions1= fileEntity.getFileVersionsById().stream().map(f -> new FileVersionDto(f)).collect(Collectors.toList());
-
         List<FileVersionDto> versions= fileEntity.getFileVersionsById().stream().map(f -> new FileVersionDto(f)).sorted(Comparator.comparing(FileVersionDto::getVersionNumber)).collect(Collectors.toList());
         if(versions.size() > 0) {
             latestVersion = versions.get(versions.size() - 1);
         }
         permissions = fileEntity.getFilePermissionsById().stream().map(f -> f.getPermissionTypeByPermissionTypeId().getName()).collect(Collectors.toList());
-        System.out.println("Permissions: " + permissions.size());
+
     }
 
     public Long getId() {
