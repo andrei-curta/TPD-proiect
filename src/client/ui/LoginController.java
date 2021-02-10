@@ -70,12 +70,14 @@ public class LoginController {
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("UserListView.fxml"));
                     Parent root1 = (Parent) fxmlLoader.load();
                     Stage stage = new Stage();
-                    stage.initModality(Modality.APPLICATION_MODAL);
-                    stage.initStyle(StageStyle.UNDECORATED);
+
                     stage.setTitle("Users");
                     stage.setScene(new Scene(root1));
-
                     stage.show();
+
+                    Stage currentStage = (Stage) btnLogin.getScene().getWindow();
+                    currentStage.close();
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

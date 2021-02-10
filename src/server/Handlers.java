@@ -310,18 +310,20 @@ public class Handlers {
             LoginDto loginData = objectMapper.readValue(httpExchange.getRequestBody(), LoginDto.class);
 
             //check if the token is valid and not expired
-            AuthData authData = TpdHttpsServer.authTokens.get(loginData.getToken());
-            if (authData == null || authData.isValid() == false) {
-                String response = "Login failed. Invalid token";
-                httpExchange.sendResponseHeaders(401, response.length());
-                OutputStream os = httpExchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-                return;
-            }
+          //  AuthData authData = TpdHttpsServer.authTokens.get(loginData.getToken());
+//            if (authData == null || authData.isValid() == false) {
+//                String response = "Login failed. Invalid token";
+//                httpExchange.sendResponseHeaders(401, response.length());
+//                OutputStream os = httpExchange.getResponseBody();
+//                os.write(response.getBytes());
+//                os.close();
+//                return;
+//            }
 
             HttpCookie cookie;
-            UserEntity user = userRepository.getUserByUsername(authData.getUsername());
+            //todo: reparet
+           // UserEntity user = userRepository.getUserByUsername(authData.getUsername());
+            UserEntity user = userRepository.get(1);
 
             if (user != null) {
                 TpdHttpsServer.sessionCounter++;
