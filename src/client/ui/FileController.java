@@ -89,7 +89,8 @@ public class FileController {
             }
 
             //encrypt content before sending to the server
-            String encryptedContent = Crypto.encrypt(file.getLatestVersion().getContents().getBytes(UTF_8), pwdDecrypt.getText());
+            System.out.println(txtContents.getText());
+            String encryptedContent = Crypto.encrypt(txtContents.getText().getBytes(UTF_8), pwdDecrypt.getText());
             file.getLatestVersion().setContents(encryptedContent);
 
             String payload = objectMapper.writeValueAsString(file);
