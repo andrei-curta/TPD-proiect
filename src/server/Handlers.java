@@ -8,25 +8,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import entities.*;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import server.repository.*;
-import sun.plugin.cache.FileVersion;
 import util.EmailClient;
-import util.HibernateUtil;
 
-import javax.xml.ws.handler.Handler;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 public class Handlers {
 
@@ -345,20 +336,20 @@ public class Handlers {
             LoginDto loginData = objectMapper.readValue(httpExchange.getRequestBody(), LoginDto.class);
 
             //check if the token is valid and not expired
-            //  AuthData authData = TpdHttpsServer.authTokens.get(loginData.getToken());
-//            if (authData == null || authData.isValid() == false) {
-//                String response = "Login failed. Invalid token";
-//                httpExchange.sendResponseHeaders(401, response.length());
-//                OutputStream os = httpExchange.getResponseBody();
-//                os.write(response.getBytes());
-//                os.close();
-//                return;
-//            }
+            AuthData authData = TpdHttpsServer.authTokens.get(loginData.getToken());
+            if (authData == null || authData.isValid() == false) {
+                String response = "Login failed. Invalid token";
+                httpExchange.sendResponseHeaders(401, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+                return;
+            }
 
             HttpCookie cookie;
             //todo: reparet
-            // UserEntity user = userRepository.getUserByUsername(authData.getUsername());
-            UserEntity user = userRepository.get(1);
+            UserEntity user = userRepository.getUserByUsername(authData.getUsername());
+
 
             if (user != null) {
                 TpdHttpsServer.sessionCounter++;
