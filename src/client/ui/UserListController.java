@@ -6,11 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
@@ -25,8 +27,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class UserListController implements Initializable {
+
     @FXML
     private ListView lstUsers;
+    @FXML
+    private Button btnAddFile;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -68,6 +73,24 @@ public class UserListController implements Initializable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void addNewFile(ActionEvent event){
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FileView.fxml"));
+            Parent root1 = (Parent) fxmlLoader.load();
+            Stage stage = new Stage();
+
+            stage.setTitle("File");
+            stage.setScene(new Scene(root1));
+            //pass data to the controller
+            FileController controller = fxmlLoader.getController();
+            controller.initData(null);
+
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -78,11 +78,21 @@ public class FileController {
     }
 
     private void setupAccordingToPermissions() {
-        if (!file.getPermissions().contains("write")) {
+        if (file == null) {
+            txtContents.setEditable(true);
+            txtContents.setDisable(false);
+            btnSave.setDisable(false);
+            btnDownload.setDisable(true);
+        } else if (file.getPermissions().contains("write")) {
+            txtContents.setEditable(true);
+            txtContents.setDisable(false);
+            btnSave.setDisable(false);
+            btnDownload.setDisable(false);
+        } else if (file.getPermissions().contains("read")) {
             txtContents.setEditable(false);
             txtContents.setDisable(true);
             btnSave.setDisable(true);
-            btnDownload.setDisable(true);
+            btnDownload.setDisable(false);
         }
     }
 
@@ -120,7 +130,7 @@ public class FileController {
                 return;
             }
 
-            if (file.getId() == null || !successfullyDecrypted) {
+            if (file != null && file.getId() != null && !successfullyDecrypted) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Not allowed");
                 alert.setContentText("You must first decrypt the message");
@@ -131,6 +141,13 @@ public class FileController {
             //encrypt content before sending to the server
             System.out.println(txtContents.getText());
             String encryptedContent = Crypto.encrypt(txtContents.getText().getBytes(UTF_8), pwdDecrypt.getText());
+
+            if (file == null) {
+                file = new FileDto();
+                file.setTitle("new");
+                FileVersionDto fileVersion = new FileVersionDto();
+                file.setLatestVersion(fileVersion);
+            }
             file.getLatestVersion().setContents(encryptedContent);
 
             String payload = objectMapper.writeValueAsString(file);
